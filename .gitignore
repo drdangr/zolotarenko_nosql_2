@@ -1,0 +1,22 @@
+# Секрети
+.env
+
+# Дані та артефакти (важкі, не комітимо — відтворюються скриптами)
+data/
+embeddings/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Kaggle
+arxiv.zip
+arxiv-metadata-oai-snapshot.json
+
+# Системне
+.DS_Store
+Thumbs.db
+.ipynb_checkpoints/
