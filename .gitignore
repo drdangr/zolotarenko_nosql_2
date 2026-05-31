@@ -16,6 +16,10 @@ venv/
 arxiv.zip
 arxiv-metadata-oai-snapshot.json
 
+# UI: dev-обв'язка та згенерований дубль (карта працює з ui/map_data.js)
+ui/serve.mjs
+ui/public/
+
 # Системне
 .DS_Store
 Thumbs.db
