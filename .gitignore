@@ -19,6 +19,7 @@ arxiv-metadata-oai-snapshot.json
 # UI: dev-обв'язка та згенерований дубль (карта працює з ui/map_data.js)
 ui/serve.mjs
 ui/public/
+_make_screenshots.py
 
 # Системне
 .DS_Store
