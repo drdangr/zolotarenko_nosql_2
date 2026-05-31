@@ -28,23 +28,55 @@ zolotarenko_nosql_2/
 └── README.md
 ```
 
-## Як запустити
+## Розгортання з нуля
 
+### Передумови
+- **Python 3.10+** (тестовано на 3.12).
+- **~7 ГБ вільного місця** (датасет: ~1.2 ГБ архів + ~5.3 ГБ розпакований JSONL).
+- **GPU з CUDA** бажано (ембединги 10k рахуються за хвилину), але працює і на CPU
+  (повільніше) — код сам обирає пристрій (`cuda` ↔ `cpu`).
+- Безкоштовний акаунт **Pinecone** (тариф Starter) і акаунт **Kaggle**.
+
+### 1. Залежності
 ```bash
 pip install -r requirements.txt
-cp .env.example .env            # та вписати свій PINECONE_API_KEY
+```
+> `torch` ставиться як залежність `sentence-transformers` (за замовчуванням CPU-версія).
+> Для GPU спершу встанови torch під свою CUDA з https://pytorch.org, а тоді решту.
 
-# датасет (потрібен ~/.kaggle/kaggle.json):
+### 2. Ключ Pinecone
+Зареєструйся на https://pinecone.io → розділ **API Keys** → **Create key**. Потім:
+```bash
+cp .env.example .env      # і впиши свій ключ у PINECONE_API_KEY
+```
+
+### 3. Датасет (Kaggle)
+1. Створи API-токен: https://www.kaggle.com → **Settings → API → Create New Token**
+   (завантажиться `kaggle.json`).
+2. Поклади його у `~/.kaggle/kaggle.json` (Windows: `C:\Users\<ім'я>\.kaggle\kaggle.json`).
+3. Завантаж і розпакуй так, щоб JSON опинився саме в теці `data/`:
+```bash
 kaggle datasets download -d Cornell-University/arxiv
-unzip arxiv.zip -d data/
+unzip arxiv.zip -d data/        # → data/arxiv-metadata-oai-snapshot.json (~5.3 ГБ)
+```
 
-python scripts/01_prepare_data.py
-python scripts/02_embed.py
-python scripts/03_load_to_pinecone.py
+### 4. Основний пайплайн (запускати послідовно)
+```bash
+python scripts/01_prepare_data.py     # → data/arxiv_subset.parquet
+python scripts/02_embed.py            # → embeddings/embeddings.npy
+python scripts/03_load_to_pinecone.py # створює індекс arxiv-papers і завантажує вектори
 python scripts/04_search.py
-python scripts/05_chunking.py
+python scripts/05_chunking.py         # створює індекси arxiv-chunks-*
 python scripts/06_hybrid_search.py
 ```
+
+### 5. Бонус — інтерактивний UI (потребує кроків 1–3)
+```bash
+python scripts/07_export_map.py       # → ui/map_data.js (уже в репозиторії, крок можна пропустити)
+python app.py                         # Flask: UI + пошук на http://localhost:5000
+```
+> Карта відкривається одразу (`ui/map_data.js` закомічено), але **пошук** потребує заповненого
+> індексу Pinecone — тобто спершу мають відпрацювати кроки 1–3.
 
 > **Примітка про відбір даних.** Дамп arXiv відсортований за датою (старі статті 2007 р. —
 > на початку файлу). Щоб фільтри за роком у Частині 3 були змістовними, `01_prepare_data.py`
